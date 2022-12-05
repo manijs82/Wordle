@@ -42,9 +42,9 @@ public class Guess : MonoBehaviour
         UpdateLetters();
     }
 
-    public void MakeRed()
+    public void ChangeColorForAll(Color color)
     {
-        foreach (var letter in letters) letter.SetColor(Color.red);
+        foreach (var letter in letters) letter.SetColor(color);
     }
 
     public string GetWord()

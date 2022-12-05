@@ -1,5 +1,10 @@
 [System.Serializable]
 public class WordList
 {
-    public string[] wordList;
+    public string[] words;
+
+    public WordList(string[] words)
+    {
+        this.words = words;
+    }
 }
