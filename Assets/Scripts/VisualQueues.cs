@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 public class VisualQueues : MonoBehaviour
 {
     [SerializeField] private GuessBoard guessBoard;
-    [SerializeField] private TextMeshProUGUI textMesh;
+    [SerializeField] private TextMeshProUGUI goalText;
+    [SerializeField] private TextMeshProUGUI guessText;
     [SerializeField] private Transform endBtn;
     
     private float _alpha;
@@ -19,16 +20,15 @@ public class VisualQueues : MonoBehaviour
 
     private void Update()
     {
-        textMesh.alpha = _alpha;
+        guessText.alpha = _alpha;
     }
 
-    private void EndGame(bool win)
+    private void EndGame(bool win, string goal)
     {
+        if (!win) 
+            goalText.text = goal;
+
         endBtn.DOScale(1, .5f).SetEase(Ease.OutQuint);
-        if (win)
-        {
-            
-        }
     }
 
     private void SayGuessNotCorrect()

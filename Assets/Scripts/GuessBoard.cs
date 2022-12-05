@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -7,15 +8,16 @@ using Random = UnityEngine.Random;
 public class GuessBoard : MonoBehaviour
 {
     public event Action OnGuessNotCorrect;
-    public event Action<bool> OnEndGame;
+    public event Action<bool, string> OnEndGame;
 
     [SerializeField] private GameRules gameRules;
     [SerializeField] private Guess guess;
 
-    private Guess[] _guesses;
-    private int _currentGuess;
-    private string _goal;
     private WordList _list;
+    private Guess[] _guesses;
+    private string _goal;
+    private int _currentGuess;
+    private Dictionary<char, int> _checkedLetters;
     private bool gameEnded;
 
     public int MaxGuess => gameRules.maxGuesses;
@@ -24,17 +26,12 @@ public class GuessBoard : MonoBehaviour
     private void Awake()
     {
         InitGuesses();
+        _checkedLetters = new Dictionary<char, int>();
         _list = JsonConvert.DeserializeObject<WordList>(LoadResourceTextFile("fiveLetterWords.json"));
         _goal = _list.wordList[Random.Range(0, _list.wordList.Length)].ToUpper();
         print(_goal);
 
         Key.OnKeyPress += OnKeyPressed;
-    }
-
-    public Color GetValidation(char character, int index)
-    {
-        if (!_goal.Contains(character)) return Color.grey;
-        return _goal.IndexOf(character) == index ? Color.green : Color.yellow;
     }
 
     private string LoadResourceTextFile(string path)
@@ -81,12 +78,17 @@ public class GuessBoard : MonoBehaviour
         _guesses[_currentGuess].PutLetter(keyCode.ToString());
     }
 
-    private void EndGame()
+    public Color GetValidation(char character, int index)
     {
-        gameEnded = true;
-        if(_guesses[_currentGuess].GetWord() != _goal)
-            _guesses[_currentGuess].MakeRed();
-        OnEndGame?.Invoke(_guesses[_currentGuess].GetWord() == _goal);
+        if (!_goal.Contains(character)) return Color.grey;
+        Color color = Color.grey;
+        color = _goal.IndexOf(character) == index ? Color.green : Color.yellow;
+
+        if (!_checkedLetters.ContainsKey(character))
+            _checkedLetters.Add(character, 1);
+        else
+            _checkedLetters[character] += 1;
+        return color;
     }
 
     private void LockGuess()
@@ -105,5 +107,13 @@ public class GuessBoard : MonoBehaviour
             return;
         }
         _currentGuess++;
+    }
+
+    private void EndGame()
+    {
+        gameEnded = true;
+        if(_guesses[_currentGuess].GetWord() != _goal)
+            _guesses[_currentGuess].MakeRed();
+        OnEndGame?.Invoke(_guesses[_currentGuess].GetWord() == _goal, _goal);
     }
 }
