@@ -30,8 +30,8 @@ public class GuessBoard : MonoBehaviour
     {
         InitGuesses();
         _checkedLetters = new Dictionary<char, int>();
-        _list = new WordList(LoadResourceTextFile(@"\Resources\WordList.txt"));
-        _goal = _list.words[Random.Range(0, _list.words.Length)].ToUpper();
+        _list = new WordList(LoadResourceTextFile("WordList"));
+        _goal = _list.words[Random.Range(0, _list.words.Length)];
         print(_goal);
 
         Key.OnKeyPress += OnKeyPressed;
@@ -39,11 +39,16 @@ public class GuessBoard : MonoBehaviour
 
     private string[] LoadResourceTextFile(string path)
     {
-        var words = File.ReadAllLines(Application.dataPath + path);
-        for (var i = 0; i < words.Length; i++) 
-            words[i] = words[i].ToUpper();
+        var file = Resources.Load<TextAsset>(path);
+        var content = file.text;
+        var allWords = content.Split("\n");
+        for (var i = 0; i < allWords.Length; i++)
+        {
+            allWords[i] = allWords[i].ToUpper();
+            allWords[i] = allWords[i].Substring(0, 5);
+        }
 
-        return words;
+        return allWords;
     }
 
     private void InitGuesses()
